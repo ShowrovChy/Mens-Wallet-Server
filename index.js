@@ -66,7 +66,7 @@ async function run() {
 
     // GET API get all Review...
     app.get("/allReviews", async (req, res) => {
-      const cursor = ProductsCollection.find({});
+      const cursor = ReviewsCollection.find({});
       const reviews = await cursor.toArray();
       res.json(reviews);
     });
@@ -114,19 +114,26 @@ async function run() {
       const result = await UsersCollection.insertOne(user);
       res.json(result);
     });
+    //  PUT API  Make an Admin
 
-    app.put("/users", async (req, res) => {
-      const user = req.body;
-      const filter = { email: user.email };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: user,
-      };
-      const result = await UsersCollection.updateOne(
-        filter,
-        updateDoc,
-        options
-      );
+    app.put("/makeAdmin", async (req, res) => {
+      const filter = { email: req.body.email };
+      const result = await UsersCollection.find(filter).toArray();
+      if (result) {
+        const documents = await UsersCollection.updateOne(filter, {
+          $set: { role: "admin" },
+        });
+
+        res.json(documents);
+      }
+    });
+
+    //  GET API  Check Admin or Not
+    app.get("/checkAdmin/:email", async (req, res) => {
+      const result = await UsersCollection.find({
+        email: req.params.email,
+      }).toArray();
+      console.log(result);
       res.json(result);
     });
   } finally {
